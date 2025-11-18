@@ -7,7 +7,7 @@ let isUnlocked = false;
 
 // START: 수정된 부분 (볼륨 저장 키 및 getter/setter)
 const BGM_VOLUME_KEY = 'aiQuizBgmVolume';
-const DEFAULT_BGM_VOLUME = 0.2;
+const DEFAULT_BGM_VOLUME = 0.7;
 
 /**
  * localStorage에서 저장된 BGM 볼륨 값을 가져옵니다.
@@ -60,7 +60,7 @@ export const unlockAudio = () => {
     correctAudio.volume = 1.0; 
 
     incorrectAudio = new Audio('/incorrect.mp3');
-    incorrectAudio.volume = 0.6;
+    incorrectAudio.volume = 0.5;
 
     // BGM 대신 짧은 효과음을 사용해 오디오 잠금을 해제합니다.
     if (correctAudio) {
