@@ -1,40 +1,58 @@
-const createAudioContext = (): AudioContext | null => {
+// Audio objects for playback
+let bgmAudio: HTMLAudioElement | null = null;
+let correctAudio: HTMLAudioElement | null = null;
+let incorrectAudio: HTMLAudioElement | null = null;
+
+let isUnlocked = false;
+
+// Function to initialize and unlock audio on the first user interaction
+export const unlockAudio = () => {
+  if (isUnlocked || typeof window === 'undefined') return;
+
   try {
-    return new (window.AudioContext || (window as any).webkitAudioContext)();
-  } catch (e) {
-    console.warn("Web Audio API is not supported in this browser");
-    return null;
+    bgmAudio = new Audio('/bgm.mp3');
+    bgmAudio.loop = true;
+    bgmAudio.volume = 0.3;
+
+    correctAudio = new Audio('/correct.mp3');
+    incorrectAudio = new Audio('/incorrect.mp3');
+
+    // A tiny silent audio play to unlock on iOS and other browsers
+    bgmAudio.play().then(() => bgmAudio?.pause()).catch(() => {});
+    
+    isUnlocked = true;
+    console.log("Audio unlocked");
+  } catch (error) {
+    console.error("Failed to initialize audio:", error);
   }
 };
 
-const audioContext = createAudioContext();
-
-function playSound(type: 'select') {
-  if (!audioContext) return;
-  if (audioContext.state === 'suspended') {
-      audioContext.resume();
+// --- BGM Controls ---
+export const playBGM = () => {
+  if (bgmAudio) {
+    bgmAudio.currentTime = 0;
+    bgmAudio.play().catch(error => console.warn("BGM play failed:", error));
   }
+};
 
-  const oscillator = audioContext.createOscillator();
-  const gainNode = audioContext.createGain();
-  
-  oscillator.connect(gainNode);
-  gainNode.connect(audioContext.destination);
-
-  const now = audioContext.currentTime;
-  gainNode.gain.setValueAtTime(0, now);
-  gainNode.gain.linearRampToValueAtTime(0.2, now + 0.01);
-
-  switch(type) {
-    case 'select':
-      oscillator.type = 'sine';
-      oscillator.frequency.setValueAtTime(440, now); // A4
-      break;
+export const stopBGM = () => {
+  if (bgmAudio) {
+    bgmAudio.pause();
+    bgmAudio.currentTime = 0;
   }
+};
 
-  oscillator.start(now);
-  gainNode.gain.exponentialRampToValueAtTime(0.00001, now + 0.2);
-  oscillator.stop(now + 0.2);
-}
+// --- Sound Effect Controls ---
+export const playCorrectSound = () => {
+  if (correctAudio) {
+    correctAudio.currentTime = 0;
+    correctAudio.play().catch(error => console.warn("Correct sound play failed:", error));
+  }
+};
 
-export const playSelectSound = () => playSound('select');
+export const playIncorrectSound = () => {
+  if (incorrectAudio) {
+    incorrectAudio.currentTime = 0;
+    incorrectAudio.play().catch(error => console.warn("Incorrect sound play failed:", error));
+  }
+};

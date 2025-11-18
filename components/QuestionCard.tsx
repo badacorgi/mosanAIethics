@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Question } from '../types';
-import { playSelectSound } from '../utils/sounds';
+import { playCorrectSound, playIncorrectSound } from '../utils/sounds';
 
 interface QuestionCardProps {
   question: Question;
@@ -12,9 +12,6 @@ interface QuestionCardProps {
 }
 
 const TIME_LIMIT = 20;
-
-const correctAudio = new Audio('/correct.mp3');
-const incorrectAudio = new Audio('/incorrect.mp3');
 
 const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, totalQuestions, streak, onAnswer, onNext }) => {
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null);
@@ -52,7 +49,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
     if (timeLeft <= 0 && !isAnswered) {
         setIsAnswered(true);
         onAnswer(false);
-        incorrectAudio.play().catch(e => console.error("Error playing sound:", e));
+        playIncorrectSound();
     }
   }, [timeLeft, isAnswered, onAnswer]);
 
@@ -60,20 +57,16 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
   const handleAnswerClick = (index: number) => {
     if (isAnswered) return;
     
-    playSelectSound();
-    
     setIsAnswered(true);
     setSelectedAnswerIndex(index);
     const isCorrect = index === question.correctAnswerIndex;
     onAnswer(isCorrect);
 
-    setTimeout(() => {
-      if (isCorrect) {
-        correctAudio.play().catch(e => console.error("Error playing sound:", e));
-      } else {
-        incorrectAudio.play().catch(e => console.error("Error playing sound:", e));
-      }
-    }, 300);
+    if (isCorrect) {
+      playCorrectSound();
+    } else {
+      playIncorrectSound();
+    }
   };
 
   const getButtonClass = (index: number) => {
@@ -108,7 +101,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
       </div>
       
       {/* Scrollable Main Content */}
-      <div className="flex-grow overflow-y-auto pr-2 -mr-2 min-h-0">
+      <div className="flex-grow overflow-y-auto pr-2 -mr-2 min-h-0 pb-4">
         <div className="bg-green-50 p-6 rounded-2xl mb-4 flex items-center justify-center min-h-[120px]">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center leading-relaxed">{question.question}</h2>
         </div>
@@ -137,7 +130,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
               </div>
               <button
                   onClick={onNext}
-                  className="w-full bg-green-600 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-300"
+                  className="w-[95%] mx-auto block bg-green-600 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-300"
               >
                   {questionNumber === totalQuestions ? '결과 확인 및 기록하기' : '다음 문제'}
               </button>

@@ -1,4 +1,5 @@
 import React from 'react';
+import { unlockAudio } from '../utils/sounds';
 
 interface StartScreenProps {
   onStart: (difficulty: 'low' | 'high') => void;
@@ -6,6 +7,11 @@ interface StartScreenProps {
 }
 
 const StartScreen: React.FC<StartScreenProps> = ({ onStart, highScore }) => {
+  const handleStart = (difficulty: 'low' | 'high') => {
+    unlockAudio();
+    onStart(difficulty);
+  };
+
   return (
     <div className="flex flex-col items-center justify-center text-center h-full">
       <div className="flex-grow flex flex-col items-center justify-center">
@@ -20,13 +26,13 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart, highScore }) => {
         <h2 className="text-2xl font-bold text-gray-700 mb-4">먼저, 난이도를 골라주세요!</h2>
         <div className="w-full space-y-4">
             <button
-                onClick={() => onStart('low')}
+                onClick={() => handleStart('low')}
                 className="w-full bg-blue-500 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-blue-300"
             >
                 저학년 (쉬운 문제)
             </button>
             <button
-                onClick={() => onStart('high')}
+                onClick={() => handleStart('high')}
                 className="w-full bg-red-500 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-red-300"
             >
                 고학년 (생각하는 문제)

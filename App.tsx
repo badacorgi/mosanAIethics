@@ -1,10 +1,11 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Question, GameState, HallOfFameEntry } from './types';
 import { ALL_QUESTIONS } from './constants/quizQuestions';
 import StartScreen from './components/StartScreen';
 import QuestionCard from './components/QuestionCard';
 import ResultScreen from './components/ResultScreen';
 import HallOfFameScreen from './components/HallOfFameScreen';
+import { playBGM, stopBGM } from './utils/sounds';
 
 const TOTAL_QUESTIONS = 10;
 const HALL_OF_FAME_KEY = 'aiEthicsQuizHallOfFame';
@@ -17,7 +18,6 @@ const App: React.FC = () => {
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
   const [highScore, setHighScore] = useState(0);
-  const audioRef = useRef<HTMLAudioElement>(null);
 
   const getHallOfFame = (): HallOfFameEntry[] => {
     try {
@@ -49,14 +49,11 @@ const App: React.FC = () => {
     setStreak(0);
     setCurrentQuestionIndex(0);
     setGameState('playing');
-    
-    if (audioRef.current) {
-        audioRef.current.play().catch(error => console.warn("Audio autoplay was prevented by the browser."));
-    }
-
+    playBGM();
   }, [shuffleAndPickQuestions]);
   
   const handlePlayAgain = useCallback(() => {
+    stopBGM();
     const hallOfFame = getHallOfFame();
     if (hallOfFame.length > 0) {
       setHighScore(hallOfFame[0].score);
@@ -112,7 +109,6 @@ const App: React.FC = () => {
 
   return (
     <div className="w-screen h-screen bg-gradient-to-b from-yellow-200 via-green-200 to-blue-300 flex items-center justify-center p-4">
-      <audio ref={audioRef} src="/bgm.mp3" loop />
       <div className="w-full max-w-md h-full max-h-[800px] bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl flex flex-col p-6 text-gray-800">
         {gameState === 'start' && (
           <StartScreen onStart={handleStartQuiz} highScore={highScore} />
