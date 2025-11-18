@@ -26,7 +26,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart, topEntry }) => {
         <div>
           {/* START: 수정된 부분 (그림자 효과, 텍스트 색상 변경) */}
           <h1 className="text-5xl sm:text-6xl font-bold text-white mb-2 drop-shadow-lg" style={{ textShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
-            모산초 AI 윤리 퀴즈
+            모산 AI 윤리 퀴즈
           </h1>
           <p className="text-lg text-gray-800 font-medium">
             퀴즈를 풀며 AI 윤리박사가 되어보아요!
