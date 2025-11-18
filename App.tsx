@@ -66,7 +66,6 @@ const App: React.FC = () => {
     setGameState('start');
   }, []);
 
-  // START: 수정된 부분 (timeLeft 인자 추가 및 점수 계산 로직 변경)
   const handleAnswer = useCallback((isCorrect: boolean, timeLeft: number) => {
     if (isCorrect) {
       const bonus = streak * 10;
@@ -77,7 +76,6 @@ const App: React.FC = () => {
       setStreak(0);
     }
   }, [streak]);
-  // END: 수정된 부분
 
   const handleNextQuestion = useCallback(() => {
     const nextIndex = currentQuestionIndex + 1;
@@ -113,8 +111,14 @@ const App: React.FC = () => {
 
 
   return (
-    <div className="w-screen h-screen bg-gradient-to-b from-yellow-200 via-green-200 to-blue-300 flex items-center justify-center p-4">
-      <div className="w-full max-w-md h-full max-h-[800px] bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl flex flex-col p-6 text-gray-800">
+    // START: 수정된 부분 (레이아웃 변경)
+    // 1. 바깥 div: 배경 그라데이션을 적용하고, 화면 전체를 채우도록 변경
+    <div className="w-screen h-screen bg-gradient-to-b from-yellow-200 via-green-200 to-blue-300">
+      {/* 2. 안쪽 div: 카드 형태(max-w, max-h, bg-white, shadow 등)를 모두 제거하고, 
+             w-full, h-full로 부모(배경)를 꽉 채우도록 변경 */}
+      <div className="w-full h-full flex flex-col p-6 text-gray-800">
+    {/* END: 수정된 부분 */}
+
         {gameState === 'start' && (
           <StartScreen onStart={handleStartQuiz} topEntry={topEntry} />
         )}
@@ -129,7 +133,13 @@ const App: React.FC = () => {
           />
         )}
         {gameState === 'finished' && (
-          <ResultScreen score={score} onNameSubmit={handleNameSubmit} />
+          // START: 수정된 부분 (onGoHome prop 전달)
+          <ResultScreen 
+            score={score} 
+            onNameSubmit={handleNameSubmit} 
+            onGoHome={handlePlayAgain}
+          />
+          // END: 수정된 부분
         )}
         {gameState === 'hallOfFame' && (
           <HallOfFameScreen onPlayAgain={handlePlayAgain} />
