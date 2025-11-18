@@ -86,6 +86,7 @@ const App: React.FC = () => {
     }
   }, [currentQuestionIndex]);
 
+  // START: 수정된 부분 (중복 기록 & 최고 점수 갱신 로직)
   const handleNameSubmit = useCallback((name: string, grade: number) => {
     const newEntry: HallOfFameEntry = {
       name,
@@ -95,8 +96,27 @@ const App: React.FC = () => {
     };
 
     const hallOfFame = getHallOfFame();
-    const updatedHallOfFame = [...hallOfFame, newEntry];
+    let updatedHallOfFame = [...hallOfFame];
 
+    // 같은 학년, 같은 이름의 기존 기록이 있는지 확인
+    const existingEntryIndex = hallOfFame.findIndex(
+      entry => entry.name === newEntry.name && entry.grade === newEntry.grade
+    );
+
+    if (existingEntryIndex > -1) {
+      // 기존 기록이 있을 때
+      const existingEntry = hallOfFame[existingEntryIndex];
+      if (newEntry.score > existingEntry.score) {
+        // 새 점수가 더 높으면 기존 기록을 새 기록으로 교체
+        updatedHallOfFame[existingEntryIndex] = newEntry;
+      }
+      // 새 점수가 더 낮거나 같으면 아무것도 하지 않음 (updatedHallOfFame는 그대로)
+    } else {
+      // 기존 기록이 없으면 새 기록을 추가
+      updatedHallOfFame.push(newEntry);
+    }
+
+    // 점수(내림차순), 날짜(오름차순) 순으로 정렬
     updatedHallOfFame.sort((a, b) => {
       if (b.score !== a.score) {
         return b.score - a.score;
@@ -104,10 +124,12 @@ const App: React.FC = () => {
       return a.date - b.date;
     });
 
+    // 상위 100개만 저장
     localStorage.setItem(HALL_OF_FAME_KEY, JSON.stringify(updatedHallOfFame.slice(0, 100)));
     
     setGameState('hallOfFame');
   }, [score]);
+  // END: 수정된 부분
 
 
   return (
@@ -125,7 +147,7 @@ const App: React.FC = () => {
             streak={streak}
             onAnswer={handleAnswer}
             onNext={handleNextQuestion}
-            onQuit={handlePlayAgain} // START: 수정된 부분
+            onQuit={handlePlayAgain}
           />
         )}
         {gameState === 'finished' && (
