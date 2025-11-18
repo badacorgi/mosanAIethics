@@ -121,7 +121,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
 
         {isAnswered && (
           <div className="animate-fade-in mt-2">
-              <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg">
+              {/* START: 수정된 부분 (max-h-36 overflow-y-auto 추가) */}
+              <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg max-h-36 overflow-y-auto">
+              {/* END: 수정된 부분 */}
                   <p className="font-bold">
                       {timeLeft <= 0 ? '시간 초과! ⏰' : (isCorrect ? '정답이에요! 🎉' : '아쉬워요! 🙁')}
                   </p>
