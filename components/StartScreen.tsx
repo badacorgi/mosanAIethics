@@ -15,7 +15,13 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart, topEntry }) => {
 
   return (
     <div className="flex flex-col items-center justify-center text-center h-full">
-      <div className="flex-grow flex flex-col items-center justify-center">
+      {/* START: 수정된 부분
+        - overflow-y-auto: 내용이 화면보다 길어지면 스크롤을 허용합니다.
+        - py-4: 스크롤 시 상하 여백을 줍니다.
+      */}
+      <div className="flex-grow overflow-y-auto flex flex-col items-center justify-center py-4">
+      {/* END: 수정된 부분 */}
+
         <h1 className="text-4xl sm:text-5xl font-bold text-green-700 mb-2">AI 윤리 퀴즈</h1>
         <p className="text-lg text-gray-600 mb-8">퀴즈를 풀며 AI 윤리박사가 되어보아요!</p>
         
@@ -23,7 +29,11 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart, topEntry }) => {
           <p className="text-xl font-bold text-yellow-600">🏆 명예의 전당 최고 기록 🏆</p>
           {topEntry ? (
             <>
-              <p className="text-5xl font-bold text-yellow-500 mt-2">{topEntry.score.toLocaleString()}점</p>
+              {/* START: 수정된 부분
+                - text-5xl -> text-4xl sm:text-5xl: 작은 화면에서는 4xl, sm 사이즈 이상에서는 5xl로 보입니다.
+              */}
+              <p className="text-4xl sm:text-5xl font-bold text-yellow-500 mt-2">{topEntry.score.toLocaleString()}점</p>
+              {/* END: 수정된 부분 */}
               <p className="text-lg font-semibold text-gray-600 mt-1">{topEntry.grade}학년 {topEntry.name}</p>
             </>
           ) : (
