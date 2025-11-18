@@ -108,7 +108,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
       </div>
       
       {/* Scrollable Main Content */}
-      <div className="flex-grow overflow-y-auto pr-2 -mr-2">
+      <div className="flex-grow overflow-y-auto pr-2 -mr-2 min-h-0">
         <div className="bg-green-50 p-6 rounded-2xl mb-4 flex items-center justify-center min-h-[120px]">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center leading-relaxed">{question.question}</h2>
         </div>
