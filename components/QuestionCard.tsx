@@ -100,11 +100,23 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
         </div>
       </div>
       
-      {/* Scrollable Main Content */}
+      {/* Scrollable Main Content 
+        이제 이 스크롤은 문제, 옵션, 해설 박스들의 "틀" 역할만 합니다.
+        개별 박스들이 너무 길어지면 각각 내부 스크롤이 생깁니다.
+      */}
       <div className="flex-grow overflow-y-auto pr-2 -mr-2 min-h-0 pb-4">
-        <div className="bg-green-50 p-6 rounded-2xl mb-4 flex items-center justify-center min-h-[120px]">
+        
+        {/* START: 수정된 부분 1 (문제) */}
+        {/*
+          min-h-[120px] (최소 높이)는 유지하되,
+          max-h-48 (최대 높이 192px)와 overflow-y-auto (자동 스크롤)를 추가합니다.
+          flex, items-center, justify-center를 제거하여 스크롤이 올바르게 동작하도록 합니다.
+        */}
+        <div className="bg-green-50 p-6 rounded-2xl mb-4 min-h-[120px] max-h-48 overflow-y-auto">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center leading-relaxed">{question.question}</h2>
         </div>
+        {/* END: 수정된 부분 1 (문제) */}
+
 
         <div className="space-y-3 mb-4">
           {question.options.map((option, index) => (
@@ -121,9 +133,13 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
 
         {isAnswered && (
           <div className="animate-fade-in mt-2">
-              {/* START: 수정된 부분 (max-h-36 overflow-y-auto 추가) */}
+              
+              {/* START: 수정된 부분 2 (해설) */}
+              {/*
+                max-h-36 (최대 높이 144px)와 overflow-y-auto (자동 스크롤)를 추가합니다.
+              */}
               <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg max-h-36 overflow-y-auto">
-              {/* END: 수정된 부분 */}
+              {/* END: 수정된 부분 2 (해설) */}
                   <p className="font-bold">
                       {timeLeft <= 0 ? '시간 초과! ⏰' : (isCorrect ? '정답이에요! 🎉' : '아쉬워요! 🙁')}
                   </p>
