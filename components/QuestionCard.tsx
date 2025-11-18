@@ -7,7 +7,9 @@ interface QuestionCardProps {
   questionNumber: number;
   totalQuestions: number;
   streak: number;
-  onAnswer: (isCorrect: boolean) => void;
+  // START: 수정된 부분 (onAnswer 타입 변경)
+  onAnswer: (isCorrect: boolean, timeLeft: number) => void;
+  // END: 수정된 부분
   onNext: () => void;
 }
 
@@ -48,7 +50,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
   useEffect(() => {
     if (timeLeft <= 0 && !isAnswered) {
         setIsAnswered(true);
-        onAnswer(false);
+        // START: 수정된 부분 (timeLeft를 0으로 전달)
+        onAnswer(false, 0);
+        // END: 수정된 부분
         playIncorrectSound();
     }
   }, [timeLeft, isAnswered, onAnswer]);
@@ -60,7 +64,10 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
     setIsAnswered(true);
     setSelectedAnswerIndex(index);
     const isCorrect = index === question.correctAnswerIndex;
-    onAnswer(isCorrect);
+    
+    // START: 수정된 부분 (timeLeft 값 전달)
+    onAnswer(isCorrect, timeLeft);
+    // END: 수정된 부분
 
     if (isCorrect) {
       playCorrectSound();
@@ -100,11 +107,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
         </div>
       </div>
       
-      {/* START: 수정된 부분 1 */}
-      {/* Scrollable Main Content (flex-grow)
-        '다음 문제' 버튼을 이 영역 밖으로 이동시켰습니다.
-        이제 이 영역은 문제, 선택지, 해설 박스만 포함하며 내용이 길어지면 스크롤됩니다.
-      */}
+      {/* Scrollable Main Content (flex-grow) */}
       <div className="flex-grow overflow-y-auto pr-2 -mr-2 min-h-0 pb-4">
         
         {/* 문제 박스 (개별 스크롤 적용됨) */}
@@ -134,22 +137,25 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
                   <p className="font-bold">
                       {timeLeft <= 0 ? '시간 초과! ⏰' : (isCorrect ? '정답이에요! 🎉' : '아쉬워요! 🙁')}
                   </p>
-                  {isCorrect && streak > 0 && <p className="font-bold text-orange-500 text-sm mt-1">+ {10 + streak*10} 점!</p>}
+                  
+                  {/* START: 수정된 부분 (콤보 및 시간 보너스 점수 표시) */}
+                  {isCorrect && (
+                    <p className="font-bold text-orange-500 text-sm mt-1">
+                      + {10 + (streak * 10) + timeLeft} 점! 
+                      <span className="text-xs text-orange-400 ml-1">
+                        (기본 +10{streak > 0 ? `, 콤보 +${streak*10}` : ''}, 시간 +{timeLeft})
+                      </span>
+                    </p>
+                  )}
+                  {/* END: 수정된 부분 */}
+
                   <p className="mt-1 text-sm">{question.explanation}</p>
               </div>
-              
-              {/* '다음 문제' 버튼이 있던 div를 여기서 삭제했습니다. */}
           </div>
         )}
       </div>
-      {/* END: 수정된 부분 1 */}
 
-
-      {/* START: 수정된 부분 2 */}
-      {/* Non-scrolling Footer (flex-shrink: 0)
-        '다음 문제' 버튼을 이곳으로 이동시켰습니다.
-        정답을 선택했을 때(isAnswered)만 나타나며, 스크롤되지 않고 항상 하단에 고정됩니다.
-      */}
+      {/* Non-scrolling Footer (flex-shrink: 0) */}
       {isAnswered && (
         <div className="flex-shrink-0 mt-4 px-1">
           <button
@@ -160,7 +166,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
           </button>
         </div>
       )}
-      {/* END: 수정된 부분 2 */}
     </div>
   );
 };
