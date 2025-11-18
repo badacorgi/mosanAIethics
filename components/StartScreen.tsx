@@ -1,12 +1,13 @@
 import React from 'react';
 import { unlockAudio } from '../utils/sounds';
+import { HallOfFameEntry } from '../types';
 
 interface StartScreenProps {
   onStart: (difficulty: 'low' | 'high') => void;
-  highScore: number;
+  topEntry: HallOfFameEntry | null;
 }
 
-const StartScreen: React.FC<StartScreenProps> = ({ onStart, highScore }) => {
+const StartScreen: React.FC<StartScreenProps> = ({ onStart, topEntry }) => {
   const handleStart = (difficulty: 'low' | 'high') => {
     unlockAudio();
     onStart(difficulty);
@@ -20,7 +21,14 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart, highScore }) => {
         
         <div className="bg-white p-6 rounded-2xl shadow-md mb-8 border-2 border-yellow-300 w-full">
           <p className="text-xl font-bold text-yellow-600">🏆 명예의 전당 최고 기록 🏆</p>
-          <p className="text-5xl font-bold text-yellow-500 mt-2">{highScore.toLocaleString()}점</p>
+          {topEntry ? (
+            <>
+              <p className="text-5xl font-bold text-yellow-500 mt-2">{topEntry.score.toLocaleString()}점</p>
+              <p className="text-lg font-semibold text-gray-600 mt-1">{topEntry.grade}학년 {topEntry.name}</p>
+            </>
+          ) : (
+            <p className="text-lg text-gray-500 mt-4">아직 기록이 없어요!</p>
+          )}
         </div>
 
         <h2 className="text-2xl font-bold text-gray-700 mb-4">먼저, 난이도를 골라주세요!</h2>

@@ -17,7 +17,7 @@ const App: React.FC = () => {
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [score, setScore] = useState(0);
   const [streak, setStreak] = useState(0);
-  const [highScore, setHighScore] = useState(0);
+  const [topEntry, setTopEntry] = useState<HallOfFameEntry | null>(null);
 
   const getHallOfFame = (): HallOfFameEntry[] => {
     try {
@@ -32,7 +32,9 @@ const App: React.FC = () => {
   useEffect(() => {
     const hallOfFame = getHallOfFame();
     if (hallOfFame.length > 0) {
-      setHighScore(hallOfFame[0].score);
+      setTopEntry(hallOfFame[0]);
+    } else {
+      setTopEntry(null);
     }
   }, []);
 
@@ -56,9 +58,9 @@ const App: React.FC = () => {
     stopBGM();
     const hallOfFame = getHallOfFame();
     if (hallOfFame.length > 0) {
-      setHighScore(hallOfFame[0].score);
+      setTopEntry(hallOfFame[0]);
     } else {
-      setHighScore(0);
+      setTopEntry(null);
     }
     setDifficulty(null);
     setGameState('start');
@@ -111,7 +113,7 @@ const App: React.FC = () => {
     <div className="w-screen h-screen bg-gradient-to-b from-yellow-200 via-green-200 to-blue-300 flex items-center justify-center p-4">
       <div className="w-full max-w-md h-full max-h-[800px] bg-white/90 backdrop-blur-sm rounded-3xl shadow-2xl flex flex-col p-6 text-gray-800">
         {gameState === 'start' && (
-          <StartScreen onStart={handleStartQuiz} highScore={highScore} />
+          <StartScreen onStart={handleStartQuiz} topEntry={topEntry} />
         )}
         {gameState === 'playing' && questions.length > 0 && (
           <QuestionCard

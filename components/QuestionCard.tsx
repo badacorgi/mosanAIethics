@@ -121,19 +121,21 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
 
         {isAnswered && (
           <div className="animate-fade-in mt-2">
-              <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg mb-4">
+              <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg">
                   <p className="font-bold">
                       {timeLeft <= 0 ? '시간 초과! ⏰' : (isCorrect ? '정답이에요! 🎉' : '아쉬워요! 🙁')}
                   </p>
                   {isCorrect && streak > 0 && <p className="font-bold text-orange-500 text-sm mt-1">+ {10 + streak*10} 점!</p>}
                   <p className="mt-1 text-sm">{question.explanation}</p>
               </div>
-              <button
-                  onClick={onNext}
-                  className="w-[95%] mx-auto block bg-green-600 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-300"
-              >
-                  {questionNumber === totalQuestions ? '결과 확인 및 기록하기' : '다음 문제'}
-              </button>
+              <div className="mt-4 px-1">
+                <button
+                    onClick={onNext}
+                    className="w-full bg-green-600 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-300"
+                >
+                    {questionNumber === totalQuestions ? '결과 확인 및 기록하기' : '다음 문제'}
+                </button>
+              </div>
           </div>
         )}
       </div>

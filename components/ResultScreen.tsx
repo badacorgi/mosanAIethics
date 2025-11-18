@@ -12,11 +12,15 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ score, onNameSubmit }) => {
   
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (name.trim()) {
+    const trimmedName = name.trim();
+    // 한글 또는 영문자가 포함되었는지 확인하는 정규식
+    const nameRegex = /[ㄱ-ㅎ|ㅏ-ㅣ|가-힣|a-zA-Z]/;
+
+    if (trimmedName && nameRegex.test(trimmedName)) {
       setError('');
-      onNameSubmit(name.trim(), grade);
+      onNameSubmit(trimmedName, grade);
     } else {
-      setError('이름을 입력하세요!');
+      setError('이름을 입력해주세요!');
     }
   };
 
