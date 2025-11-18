@@ -51,11 +51,11 @@ const App: React.FC = () => {
     setStreak(0);
     setCurrentQuestionIndex(0);
     setGameState('playing');
-    playBGM();
+    playBGM(); // 퀴즈 시작 시 BGM 재생
   }, [shuffleAndPickQuestions]);
   
   const handlePlayAgain = useCallback(() => {
-    stopBGM();
+    stopBGM(); // 메인으로 돌아갈 때 BGM 중지
     const hallOfFame = getHallOfFame();
     if (hallOfFame.length > 0) {
       setTopEntry(hallOfFame[0]);
@@ -69,7 +69,6 @@ const App: React.FC = () => {
   const handleAnswer = useCallback((isCorrect: boolean, timeLeft: number) => {
     if (isCorrect) {
       const bonus = streak * 10;
-      // 기본 10점 + 콤보 보너스 + 시간 보너스(남은 시간)
       setScore(prev => prev + 10 + bonus + timeLeft);
       setStreak(prev => prev + 1);
     } else {
@@ -77,14 +76,18 @@ const App: React.FC = () => {
     }
   }, [streak]);
 
+  // START: 수정된 부분 (BGM 중지 로직 추가)
   const handleNextQuestion = useCallback(() => {
     const nextIndex = currentQuestionIndex + 1;
     if (nextIndex < TOTAL_QUESTIONS) {
       setCurrentQuestionIndex(nextIndex);
     } else {
+      // 마지막 문제일 경우, BGM을 멈추고 결과 화면으로 전환
+      stopBGM(); 
       setGameState('finished');
     }
   }, [currentQuestionIndex]);
+  // END: 수정된 부분
 
   const handleNameSubmit = useCallback((name: string, grade: number) => {
     const newEntry: HallOfFameEntry = {
@@ -111,13 +114,8 @@ const App: React.FC = () => {
 
 
   return (
-    // START: 수정된 부분 (레이아웃 변경)
-    // 1. 바깥 div: 배경 그라데이션을 적용하고, 화면 전체를 채우도록 변경
     <div className="w-screen h-screen bg-gradient-to-b from-yellow-200 via-green-200 to-blue-300">
-      {/* 2. 안쪽 div: 카드 형태(max-w, max-h, bg-white, shadow 등)를 모두 제거하고, 
-             w-full, h-full로 부모(배경)를 꽉 채우도록 변경 */}
       <div className="w-full h-full flex flex-col p-6 text-gray-800">
-    {/* END: 수정된 부분 */}
 
         {gameState === 'start' && (
           <StartScreen onStart={handleStartQuiz} topEntry={topEntry} />
@@ -133,13 +131,11 @@ const App: React.FC = () => {
           />
         )}
         {gameState === 'finished' && (
-          // START: 수정된 부분 (onGoHome prop 전달)
           <ResultScreen 
             score={score} 
             onNameSubmit={handleNameSubmit} 
             onGoHome={handlePlayAgain}
           />
-          // END: 수정된 부분
         )}
         {gameState === 'hallOfFame' && (
           <HallOfFameScreen onPlayAgain={handlePlayAgain} />
