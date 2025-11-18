@@ -13,7 +13,7 @@ export const unlockAudio = () => {
     // START: 수정된 부분 (BGM 볼륨 20%로 낮춤)
     bgmAudio = new Audio('/bgm.mp3');
     bgmAudio.loop = true;
-    bgmAudio.volume = 0.4; // 배경음악 볼륨 (20%)
+    bgmAudio.volume = 1.0; // 배경음악 볼륨 (20%)
     // END: 수정된 부분
 
     // START: 수정된 부분 (정답 볼륨 100%로 높임)
