@@ -3,9 +3,10 @@ import React, { useState } from 'react';
 interface ResultScreenProps {
   score: number;
   onNameSubmit: (name: string, grade: number) => void;
+  onGoHome: () => void; // START: 수정된 부분 (prop 추가)
 }
 
-const ResultScreen: React.FC<ResultScreenProps> = ({ score, onNameSubmit }) => {
+const ResultScreen: React.FC<ResultScreenProps> = ({ score, onNameSubmit, onGoHome }) => { // START: 수정된 부분 (prop 받기)
   const [name, setName] = useState('');
   const [grade, setGrade] = useState(1);
   const [error, setError] = useState('');
@@ -26,7 +27,9 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ score, onNameSubmit }) => {
 
   return (
     <div className="flex flex-col items-center justify-center text-center h-full">
-      <div className="flex-grow flex flex-col items-center justify-center w-full">
+      {/* START: 수정된 부분 (overflow-y-auto 추가) */}
+      <div className="flex-grow flex flex-col items-center justify-center w-full overflow-y-auto py-4">
+      {/* END: 수정된 부분 */}
         <h2 className="text-3xl sm:text-4xl font-bold text-green-700 mb-4">퀴즈 완료!</h2>
         
         <div className="bg-white p-6 rounded-2xl shadow-md mb-6 w-full">
@@ -61,6 +64,16 @@ const ResultScreen: React.FC<ResultScreenProps> = ({ score, onNameSubmit }) => {
                 기록하고 순위 보기
             </button>
         </form>
+
+        {/* START: 수정된 부분 (버튼 추가) */}
+        <button
+          onClick={onGoHome}
+          className="w-full text-gray-700 font-semibold text-lg py-3 mt-2"
+        >
+          기록하지 않고 메인으로
+        </button>
+        {/* END: 수정된 부분 */}
+
       </div>
     </div>
   );
