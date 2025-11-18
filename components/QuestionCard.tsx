@@ -86,7 +86,7 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      {/* Non-scrolling Header */}
+      {/* Non-scrolling Header (flex-shrink: 0) */}
       <div className="flex-shrink-0 mb-4">
         <div className="flex justify-between items-center">
             <p className="text-green-600 font-bold text-xl">문제 {questionNumber}/{totalQuestions}</p>
@@ -100,24 +100,19 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
         </div>
       </div>
       
-      {/* Scrollable Main Content 
-        이제 이 스크롤은 문제, 옵션, 해설 박스들의 "틀" 역할만 합니다.
-        개별 박스들이 너무 길어지면 각각 내부 스크롤이 생깁니다.
+      {/* START: 수정된 부분 1 */}
+      {/* Scrollable Main Content (flex-grow)
+        '다음 문제' 버튼을 이 영역 밖으로 이동시켰습니다.
+        이제 이 영역은 문제, 선택지, 해설 박스만 포함하며 내용이 길어지면 스크롤됩니다.
       */}
       <div className="flex-grow overflow-y-auto pr-2 -mr-2 min-h-0 pb-4">
         
-        {/* START: 수정된 부분 1 (문제) */}
-        {/*
-          min-h-[120px] (최소 높이)는 유지하되,
-          max-h-48 (최대 높이 192px)와 overflow-y-auto (자동 스크롤)를 추가합니다.
-          flex, items-center, justify-center를 제거하여 스크롤이 올바르게 동작하도록 합니다.
-        */}
+        {/* 문제 박스 (개별 스크롤 적용됨) */}
         <div className="bg-green-50 p-6 rounded-2xl mb-4 min-h-[120px] max-h-48 overflow-y-auto">
           <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center leading-relaxed">{question.question}</h2>
         </div>
-        {/* END: 수정된 부분 1 (문제) */}
 
-
+        {/* 선택지 박스 */}
         <div className="space-y-3 mb-4">
           {question.options.map((option, index) => (
             <button
@@ -131,32 +126,41 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
           ))}
         </div>
 
+        {/* 해설 박스 (정답을 선택했을 때만 보임) */}
         {isAnswered && (
           <div className="animate-fade-in mt-2">
-              
-              {/* START: 수정된 부분 2 (해설) */}
-              {/*
-                max-h-36 (최대 높이 144px)와 overflow-y-auto (자동 스크롤)를 추가합니다.
-              */}
+              {/* 해설 (개별 스크롤 적용됨) */}
               <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg max-h-36 overflow-y-auto">
-              {/* END: 수정된 부분 2 (해설) */}
                   <p className="font-bold">
                       {timeLeft <= 0 ? '시간 초과! ⏰' : (isCorrect ? '정답이에요! 🎉' : '아쉬워요! 🙁')}
                   </p>
                   {isCorrect && streak > 0 && <p className="font-bold text-orange-500 text-sm mt-1">+ {10 + streak*10} 점!</p>}
                   <p className="mt-1 text-sm">{question.explanation}</p>
               </div>
-              <div className="mt-4 px-1">
-                <button
-                    onClick={onNext}
-                    className="w-full bg-green-600 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-300"
-                >
-                    {questionNumber === totalQuestions ? '결과 확인 및 기록하기' : '다음 문제'}
-                </button>
-              </div>
+              
+              {/* '다음 문제' 버튼이 있던 div를 여기서 삭제했습니다. */}
           </div>
         )}
       </div>
+      {/* END: 수정된 부분 1 */}
+
+
+      {/* START: 수정된 부분 2 */}
+      {/* Non-scrolling Footer (flex-shrink: 0)
+        '다음 문제' 버튼을 이곳으로 이동시켰습니다.
+        정답을 선택했을 때(isAnswered)만 나타나며, 스크롤되지 않고 항상 하단에 고정됩니다.
+      */}
+      {isAnswered && (
+        <div className="flex-shrink-0 mt-4 px-1">
+          <button
+              onClick={onNext}
+              className="w-full bg-green-600 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-300"
+          >
+              {questionNumber === totalQuestions ? '결과 확인 및 기록하기' : '다음 문제'}
+          </button>
+        </div>
+      )}
+      {/* END: 수정된 부분 2 */}
     </div>
   );
 };
