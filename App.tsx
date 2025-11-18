@@ -51,11 +51,11 @@ const App: React.FC = () => {
     setStreak(0);
     setCurrentQuestionIndex(0);
     setGameState('playing');
-    playBGM(); // 퀴즈 시작 시 BGM 재생
+    playBGM();
   }, [shuffleAndPickQuestions]);
   
   const handlePlayAgain = useCallback(() => {
-    stopBGM(); // 메인으로 돌아갈 때 BGM 중지
+    stopBGM();
     const hallOfFame = getHallOfFame();
     if (hallOfFame.length > 0) {
       setTopEntry(hallOfFame[0]);
@@ -76,18 +76,15 @@ const App: React.FC = () => {
     }
   }, [streak]);
 
-  // START: 수정된 부분 (BGM 중지 로직 추가)
   const handleNextQuestion = useCallback(() => {
     const nextIndex = currentQuestionIndex + 1;
     if (nextIndex < TOTAL_QUESTIONS) {
       setCurrentQuestionIndex(nextIndex);
     } else {
-      // 마지막 문제일 경우, BGM을 멈추고 결과 화면으로 전환
       stopBGM(); 
       setGameState('finished');
     }
   }, [currentQuestionIndex]);
-  // END: 수정된 부분
 
   const handleNameSubmit = useCallback((name: string, grade: number) => {
     const newEntry: HallOfFameEntry = {
@@ -128,6 +125,7 @@ const App: React.FC = () => {
             streak={streak}
             onAnswer={handleAnswer}
             onNext={handleNextQuestion}
+            onQuit={handlePlayAgain} // START: 수정된 부분
           />
         )}
         {gameState === 'finished' && (
