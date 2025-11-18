@@ -8,20 +8,26 @@ interface StartScreenProps {
 }
 
 const StartScreen: React.FC<StartScreenProps> = ({ onStart, topEntry }) => {
-  // START: 수정된 부분 (볼륨 state 및 핸들러)
   const [volume, setVolume] = useState(() => getBGMVolume());
 
-  const handleStart = (difficulty: 'low' | 'high') => {
-    unlockAudio();
-    onStart(difficulty);
+  // START: 수정된 부분 (async / await 추가)
+  const handleStart = async (difficulty: 'low' | 'high') => {
+    try {
+      await unlockAudio(); // unlockAudio가 완료될 때까지 기다림
+      onStart(difficulty); // 오디오가 준비된 후 퀴즈 시작
+    } catch (error) {
+      console.error("Audio unlock failed:", error);
+      // 오디오 잠금에 실패해도 퀴즈는 시작 (소리가 안 날 수 있음)
+      onStart(difficulty);
+    }
   };
+  // END: 수정된 부분
 
   const handleVolumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newVolume = parseFloat(e.target.value);
     setVolume(newVolume);
     setBGMVolume(newVolume);
   };
-  // END: 수정된 부분
 
   return (
     <div className="flex flex-col items-center justify-center text-center h-full">
@@ -73,7 +79,7 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart, topEntry }) => {
           </div>
           <p className="text-base text-gray-700 mt-6 px-4">각 난이도별 문제 중 10개가<br/>무작위로 출제됩니다.</p>
           
-          {/* START: 수정된 부분 (볼륨 슬라이더 추가) */}
+          {/* 볼륨 슬라이더 */}
           <div className="w-full mt-8">
             <label htmlFor="volumeSlider" className="text-sm font-medium text-gray-700 flex items-center justify-center">
               <span className="mr-2">🔉</span> 배경음악 볼륨
@@ -89,7 +95,6 @@ const StartScreen: React.FC<StartScreenProps> = ({ onStart, topEntry }) => {
               className="w-full h-2 bg-white/50 rounded-lg appearance-none cursor-pointer backdrop-blur-sm mt-2"
             />
           </div>
-          {/* END: 수정된 부분 */}
         </div>
 
       </div>
