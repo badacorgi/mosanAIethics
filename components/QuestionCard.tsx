@@ -20,7 +20,6 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
   const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
-  // FIX: Replace Node.js-specific type 'NodeJS.Timeout' with 'ReturnType<typeof setInterval>' for browser compatibility.
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const resetTimer = () => {
@@ -93,8 +92,9 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
   const isCorrect = selectedAnswerIndex === question.correctAnswerIndex;
 
   return (
-    <div className="flex flex-col h-full">
-      <div className="mb-4">
+    <div className="flex flex-col h-full overflow-hidden">
+      {/* Non-scrolling Header */}
+      <div className="flex-shrink-0 mb-4">
         <div className="flex justify-between items-center">
             <p className="text-green-600 font-bold text-xl">문제 {questionNumber}/{totalQuestions}</p>
             { streak > 0 && isAnswered && isCorrect && <span className="text-orange-500 font-bold animate-bounce">🔥 {streak} COMBO!</span> }
@@ -107,40 +107,43 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
         </div>
       </div>
       
-      <div className="bg-green-50 p-6 rounded-2xl flex-grow mb-4 flex items-center justify-center">
-        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center leading-relaxed">{question.question}</h2>
-      </div>
-
-      <div className="space-y-3 mb-4">
-        {question.options.map((option, index) => (
-          <button
-            key={index}
-            onClick={() => handleAnswerClick(index)}
-            disabled={isAnswered}
-            className={`w-full p-4 rounded-xl text-lg text-left font-semibold shadow-md transition-all duration-300 ${getButtonClass(index)}`}
-          >
-            {index + 1}. {option}
-          </button>
-        ))}
-      </div>
-
-      {isAnswered && (
-        <div className="flex-shrink-0 mt-2 animate-fade-in">
-            <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg mb-4">
-                <p className="font-bold">
-                    {timeLeft <= 0 ? '시간 초과! ⏰' : (isCorrect ? '정답이에요! 🎉' : '아쉬워요! 🙁')}
-                </p>
-                {isCorrect && streak > 0 && <p className="font-bold text-orange-500 text-sm mt-1">+ {10 + streak*10} 점!</p>}
-                <p className="mt-1 text-sm">{question.explanation}</p>
-            </div>
-            <button
-                onClick={onNext}
-                className="w-full bg-green-600 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-300"
-            >
-                {questionNumber === totalQuestions ? '결과 확인 및 기록하기' : '다음 문제'}
-            </button>
+      {/* Scrollable Main Content */}
+      <div className="flex-grow overflow-y-auto pr-2 -mr-2">
+        <div className="bg-green-50 p-6 rounded-2xl mb-4 flex items-center justify-center min-h-[120px]">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center leading-relaxed">{question.question}</h2>
         </div>
-      )}
+
+        <div className="space-y-3 mb-4">
+          {question.options.map((option, index) => (
+            <button
+              key={index}
+              onClick={() => handleAnswerClick(index)}
+              disabled={isAnswered}
+              className={`w-full p-4 rounded-xl text-lg text-left font-semibold shadow-md transition-all duration-300 ${getButtonClass(index)}`}
+            >
+              {index + 1}. {option}
+            </button>
+          ))}
+        </div>
+
+        {isAnswered && (
+          <div className="animate-fade-in mt-2">
+              <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg mb-4">
+                  <p className="font-bold">
+                      {timeLeft <= 0 ? '시간 초과! ⏰' : (isCorrect ? '정답이에요! 🎉' : '아쉬워요! 🙁')}
+                  </p>
+                  {isCorrect && streak > 0 && <p className="font-bold text-orange-500 text-sm mt-1">+ {10 + streak*10} 점!</p>}
+                  <p className="mt-1 text-sm">{question.explanation}</p>
+              </div>
+              <button
+                  onClick={onNext}
+                  className="w-full bg-green-600 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-300"
+              >
+                  {questionNumber === totalQuestions ? '결과 확인 및 기록하기' : '다음 문제'}
+              </button>
+          </div>
+        )}
+      </div>
     </div>
   );
 };
