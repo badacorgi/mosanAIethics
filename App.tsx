@@ -66,15 +66,18 @@ const App: React.FC = () => {
     setGameState('start');
   }, []);
 
-  const handleAnswer = useCallback((isCorrect: boolean) => {
+  // START: 수정된 부분 (timeLeft 인자 추가 및 점수 계산 로직 변경)
+  const handleAnswer = useCallback((isCorrect: boolean, timeLeft: number) => {
     if (isCorrect) {
       const bonus = streak * 10;
-      setScore(prev => prev + 10 + bonus);
+      // 기본 10점 + 콤보 보너스 + 시간 보너스(남은 시간)
+      setScore(prev => prev + 10 + bonus + timeLeft);
       setStreak(prev => prev + 1);
     } else {
       setStreak(0);
     }
   }, [streak]);
+  // END: 수정된 부분
 
   const handleNextQuestion = useCallback(() => {
     const nextIndex = currentQuestionIndex + 1;
