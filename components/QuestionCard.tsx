@@ -1,173 +1,146 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Question } from '../types';
-import { playCorrectSound, playIncorrectSound } from '../utils/sounds';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Question, GameState, HallOfFameEntry } from './types';
+import { ALL_QUESTIONS } from './constants/quizQuestions';
+import StartScreen from './components/StartScreen';
+import QuestionCard from './components/QuestionCard';
+import ResultScreen from './components/ResultScreen';
+import HallOfFameScreen from './components/HallOfFameScreen';
+import { playBGM, stopBGM } from './utils/sounds';
 
-interface QuestionCardProps {
-  question: Question;
-  questionNumber: number;
-  totalQuestions: number;
-  streak: number;
-  // START: 수정된 부분 (onAnswer 타입 변경)
-  onAnswer: (isCorrect: boolean, timeLeft: number) => void;
-  // END: 수정된 부분
-  onNext: () => void;
-}
+const TOTAL_QUESTIONS = 10;
+const HALL_OF_FAME_KEY = 'aiEthicsQuizHallOfFame';
 
-const TIME_LIMIT = 20;
+const App: React.FC = () => {
+  const [gameState, setGameState] = useState<GameState>('start');
+  const [difficulty, setDifficulty] = useState<'low' | 'high' | null>(null);
+  const [questions, setQuestions] = useState<Question[]>([]);
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
+  const [score, setScore] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [topEntry, setTopEntry] = useState<HallOfFameEntry | null>(null);
 
-const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, totalQuestions, streak, onAnswer, onNext }) => {
-  const [selectedAnswerIndex, setSelectedAnswerIndex] = useState<number | null>(null);
-  const [isAnswered, setIsAnswered] = useState(false);
-  const [timeLeft, setTimeLeft] = useState(TIME_LIMIT);
-  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
-  const resetTimer = () => {
-    if (timerRef.current) clearInterval(timerRef.current);
-    setTimeLeft(TIME_LIMIT);
+  const getHallOfFame = (): HallOfFameEntry[] => {
+    try {
+      const data = localStorage.getItem(HALL_OF_FAME_KEY);
+      return data ? JSON.parse(data) : [];
+    } catch (error) {
+      console.error("Could not parse hall of fame data:", error);
+      return [];
+    }
   };
-  
-  useEffect(() => {
-    setSelectedAnswerIndex(null);
-    setIsAnswered(false);
-    resetTimer();
-  }, [question]);
 
   useEffect(() => {
-    if (isAnswered) {
-      if (timerRef.current) clearInterval(timerRef.current);
-      return;
-    }
-    
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => prev - 1);
-    }, 1000);
-
-    return () => {
-      if (timerRef.current) clearInterval(timerRef.current);
-    };
-  }, [isAnswered]);
-
-  useEffect(() => {
-    if (timeLeft <= 0 && !isAnswered) {
-        setIsAnswered(true);
-        // START: 수정된 부분 (timeLeft를 0으로 전달)
-        onAnswer(false, 0);
-        // END: 수정된 부분
-        playIncorrectSound();
-    }
-  }, [timeLeft, isAnswered, onAnswer]);
-
-
-  const handleAnswerClick = (index: number) => {
-    if (isAnswered) return;
-    
-    setIsAnswered(true);
-    setSelectedAnswerIndex(index);
-    const isCorrect = index === question.correctAnswerIndex;
-    
-    // START: 수정된 부분 (timeLeft 값 전달)
-    onAnswer(isCorrect, timeLeft);
-    // END: 수정된 부분
-
-    if (isCorrect) {
-      playCorrectSound();
+    const hallOfFame = getHallOfFame();
+    if (hallOfFame.length > 0) {
+      setTopEntry(hallOfFame[0]);
     } else {
-      playIncorrectSound();
+      setTopEntry(null);
     }
-  };
+  }, []);
 
-  const getButtonClass = (index: number) => {
-    if (!isAnswered) {
-      return 'bg-white hover:bg-green-100';
-    }
-    if (index === question.correctAnswerIndex) {
-      return 'bg-green-500 text-white animate-pulse';
-    }
-    if (index === selectedAnswerIndex) {
-      return 'bg-red-500 text-white';
-    }
-    return 'bg-white opacity-60';
-  };
+  const shuffleAndPickQuestions = useCallback((selectedDifficulty: 'low' | 'high') => {
+    const filteredQuestions = ALL_QUESTIONS.filter(q => q.difficulty === selectedDifficulty);
+    const shuffled = [...filteredQuestions].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, TOTAL_QUESTIONS);
+  }, []);
+
+  const handleStartQuiz = useCallback((selectedDifficulty: 'low' | 'high') => {
+    setDifficulty(selectedDifficulty);
+    setQuestions(shuffleAndPickQuestions(selectedDifficulty));
+    setScore(0);
+    setStreak(0);
+    setCurrentQuestionIndex(0);
+    setGameState('playing');
+    playBGM();
+  }, [shuffleAndPickQuestions]);
   
-  const isCorrect = selectedAnswerIndex === question.correctAnswerIndex;
+  const handlePlayAgain = useCallback(() => {
+    stopBGM();
+    const hallOfFame = getHallOfFame();
+    if (hallOfFame.length > 0) {
+      setTopEntry(hallOfFame[0]);
+    } else {
+      setTopEntry(null);
+    }
+    setDifficulty(null);
+    setGameState('start');
+  }, []);
+
+  const handleAnswer = useCallback((isCorrect: boolean, timeLeft: number) => {
+    if (isCorrect) {
+      const bonus = streak * 10;
+      setScore(prev => prev + 10 + bonus + timeLeft);
+      setStreak(prev => prev + 1);
+    } else {
+      setStreak(0);
+    }
+  }, [streak]);
+
+  const handleNextQuestion = useCallback(() => {
+    const nextIndex = currentQuestionIndex + 1;
+    if (nextIndex < TOTAL_QUESTIONS) {
+      setCurrentQuestionIndex(nextIndex);
+    } else {
+      stopBGM(); 
+      setGameState('finished');
+    }
+  }, [currentQuestionIndex]);
+
+  const handleNameSubmit = useCallback((name: string, grade: number) => {
+    const newEntry: HallOfFameEntry = {
+      name,
+      grade,
+      score: score,
+      date: Date.now(),
+    };
+
+    const hallOfFame = getHallOfFame();
+    const updatedHallOfFame = [...hallOfFame, newEntry];
+
+    updatedHallOfFame.sort((a, b) => {
+      if (b.score !== a.score) {
+        return b.score - a.score;
+      }
+      return a.date - b.date;
+    });
+
+    localStorage.setItem(HALL_OF_FAME_KEY, JSON.stringify(updatedHallOfFame.slice(0, 100)));
+    
+    setGameState('hallOfFame');
+  }, [score]);
+
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
-      {/* Non-scrolling Header (flex-shrink: 0) */}
-      <div className="flex-shrink-0 mb-4">
-        <div className="flex justify-between items-center">
-            <p className="text-green-600 font-bold text-xl">문제 {questionNumber}/{totalQuestions}</p>
-            { streak > 0 && isAnswered && isCorrect && <span className="text-orange-500 font-bold animate-bounce">🔥 {streak} COMBO!</span> }
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-4 mt-1 border-2 border-gray-300 overflow-hidden">
-          <div 
-            className="bg-yellow-400 h-full rounded-full transition-all duration-1000 linear" 
-            style={{ width: `${(timeLeft / TIME_LIMIT) * 100}%` }}>
-          </div>
-        </div>
-      </div>
-      
-      {/* Scrollable Main Content (flex-grow) */}
-      <div className="flex-grow overflow-y-auto pr-2 -mr-2 min-h-0 pb-4">
-        
-        {/* 문제 박스 (개별 스크롤 적용됨) */}
-        <div className="bg-green-50 p-6 rounded-2xl mb-4 min-h-[120px] max-h-48 overflow-y-auto">
-          <h2 className="text-xl sm:text-2xl font-bold text-gray-800 text-center leading-relaxed">{question.question}</h2>
-        </div>
+    <div className="w-screen h-screen bg-gradient-to-b from-yellow-200 via-green-200 to-blue-300">
+      <div className="w-full h-full flex flex-col p-6 text-gray-800">
 
-        {/* 선택지 박스 */}
-        <div className="space-y-3 mb-4">
-          {question.options.map((option, index) => (
-            <button
-              key={index}
-              onClick={() => handleAnswerClick(index)}
-              disabled={isAnswered}
-              className={`w-full p-4 rounded-xl text-lg text-left font-semibold shadow-md transition-all duration-300 ${getButtonClass(index)}`}
-            >
-              {index + 1}. {option}
-            </button>
-          ))}
-        </div>
-
-        {/* 해설 박스 (정답을 선택했을 때만 보임) */}
-        {isAnswered && (
-          <div className="animate-fade-in mt-2">
-              {/* 해설 (개별 스크롤 적용됨) */}
-              <div className="bg-blue-100 border-l-4 border-blue-500 text-blue-800 p-4 rounded-lg max-h-36 overflow-y-auto">
-                  <p className="font-bold">
-                      {timeLeft <= 0 ? '시간 초과! ⏰' : (isCorrect ? '정답이에요! 🎉' : '아쉬워요! 🙁')}
-                  </p>
-                  
-                  {/* START: 수정된 부분 (콤보 및 시간 보너스 점수 표시) */}
-                  {isCorrect && (
-                    <p className="font-bold text-orange-500 text-sm mt-1">
-                      + {10 + (streak * 10) + timeLeft} 점! 
-                      <span className="text-xs text-orange-400 ml-1">
-                        (기본 +10{streak > 0 ? `, 콤보 +${streak*10}` : ''}, 시간 +{timeLeft})
-                      </span>
-                    </p>
-                  )}
-                  {/* END: 수정된 부분 */}
-
-                  <p className="mt-1 text-sm">{question.explanation}</p>
-              </div>
-          </div>
+        {gameState === 'start' && (
+          <StartScreen onStart={handleStartQuiz} topEntry={topEntry} />
+        )}
+        {gameState === 'playing' && questions.length > 0 && (
+          <QuestionCard
+            question={questions[currentQuestionIndex]}
+            questionNumber={currentQuestionIndex + 1}
+            totalQuestions={TOTAL_QUESTIONS}
+            streak={streak}
+            onAnswer={handleAnswer}
+            onNext={handleNextQuestion}
+            onQuit={handlePlayAgain} // START: 수정된 부분
+          />
+        )}
+        {gameState === 'finished' && (
+          <ResultScreen 
+            score={score} 
+            onNameSubmit={handleNameSubmit} 
+            onGoHome={handlePlayAgain}
+          />
+        )}
+        {gameState === 'hallOfFame' && (
+          <HallOfFameScreen onPlayAgain={handlePlayAgain} />
         )}
       </div>
-
-      {/* Non-scrolling Footer (flex-shrink: 0) */}
-      {isAnswered && (
-        <div className="flex-shrink-0 mt-4 px-1">
-          <button
-              onClick={onNext}
-              className="w-full bg-green-600 text-white font-bold text-2xl py-4 rounded-2xl shadow-lg transform hover:scale-105 transition-transform duration-200 ease-in-out focus:outline-none focus:ring-4 focus:ring-green-300"
-          >
-              {questionNumber === totalQuestions ? '결과 확인 및 기록하기' : '다음 문제'}
-          </button>
-        </div>
-      )}
     </div>
   );
 };
 
-export default QuestionCard;
+export default App;
