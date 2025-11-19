@@ -16,7 +16,13 @@ const HALL_OF_FAME_HIGH_KEY = 'aiEthicsQuizHallOfFameHigh';
 // START: 수정된 부분 (컴포넌트 로직 변경)
 const HallOfFameScreen: React.FC<HallOfFameScreenProps> = ({ onPlayAgain, currentDifficulty }) => {
     // 퀴즈를 푼 난이도를 기본 뷰로 설정하거나, 없으면 'low'로 설정
-    const [difficultyView, setDifficultyView] = useState<'low' | 'high'>(currentDifficulty || 'low');
+    // --- 에러 수정: currentDifficulty가 null일 수 있으므로 명시적으로 'low' 또는 'high'로 변환 ---
+    const initialDifficulty = currentDifficulty === 'low' || currentDifficulty === 'high' 
+        ? currentDifficulty 
+        : 'low';
+
+    const [difficultyView, setDifficultyView] = useState<'low' | 'high'>(initialDifficulty);
+    // --- 에러 수정 끝 ---
     const [topScores, setTopScores] = useState<HallOfFameEntry[]>([]);
 
     useEffect(() => {
@@ -25,7 +31,7 @@ const HallOfFameScreen: React.FC<HallOfFameScreenProps> = ({ onPlayAgain, curren
         const data = localStorage.getItem(key);
         // 상위 3개만 보여주므로 slice(0, 3) 유지
         const hallOfFame = data ? JSON.parse(data) : [];
-        setTopScores(hallOfOfFame.slice(0, 3)); 
+        setTopScores(hallOfFame.slice(0, 3)); 
     }, [difficultyView]);
 
     const rankDetails = [
