@@ -149,10 +149,12 @@ const QuestionCard: React.FC<QuestionCardProps> = ({ question, questionNumber, t
                   
                   {isCorrect && (
                     <p className="font-bold text-orange-500 text-sm mt-1">
-                      + {10 + (streak * 10) + timeLeft} 점! 
+                      {/* START: 수정된 부분 (점수 계산식 업데이트) */}
+                      + {50 + (streak * 20) + timeLeft} 점! 
                       <span className="text-xs text-orange-400 ml-1">
-                        (기본 +10{streak > 0 ? `, 콤보 +${streak*10}` : ''}, 시간 +{timeLeft})
+                        (기본 +50{streak > 0 ? `, 콤보 +${streak*20}` : ''}, 시간 +{timeLeft})
                       </span>
+                      {/* END: 수정된 부분 */}
                     </p>
                   )}
 
